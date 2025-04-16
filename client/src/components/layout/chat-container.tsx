@@ -11,6 +11,7 @@ import RequestAnalyzer from "@/components/tools/request-analyzer";
 import VulnExplainer from "@/components/tools/vuln-explainer";
 import ReconAssistant from "@/components/tools/recon-assistant";
 import BugReport from "@/components/tools/bug-report";
+import AttackScenario from "@/components/tools/attack-scenario";
 
 interface ChatContainerProps {
   activeTool: string;
@@ -65,6 +66,8 @@ const ChatContainer: FC<ChatContainerProps> = ({ activeTool }) => {
         return <ReconAssistant />;
       case "report":
         return <BugReport />;
+      case "scenario":
+        return <AttackScenario />;
       default:
         return null;
     }

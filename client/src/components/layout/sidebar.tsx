@@ -11,6 +11,7 @@ import {
   SeparatorHorizontal,
   PuzzleIcon,
   Clock,
+  Target,
 } from "lucide-react";
 import { useChat } from "@/hooks/use-chat";
 
@@ -145,6 +146,17 @@ const Sidebar: FC<SidebarProps> = ({ onToolSelect, currentTool }) => {
         >
           <FileText className="h-4 w-4 mr-2" />
           Bug Report Assistant
+        </Button>
+
+        <Button
+          variant={currentTool === "scenario" ? "default" : "ghost"}
+          className={`w-full justify-start text-left px-3 py-2 h-auto ${
+            currentTool === "scenario" ? "bg-primary-600 text-white" : ""
+          }`}
+          onClick={() => onToolSelect("scenario")}
+        >
+          <Target className="h-4 w-4 mr-2" />
+          Attack Scenario
         </Button>
 
         <div className="text-xs uppercase text-gray-500 font-semibold ml-2 mt-4">
