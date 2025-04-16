@@ -64,11 +64,8 @@ const AttackScenario: FC<AttackScenarioProps> = () => {
   const fetchScenarios = async () => {
     setIsLoadingScenarios(true);
     try {
-      const response = await apiRequest({
-        url: "/api/attack-scenarios",
-        method: "GET",
-      });
-      setScenarios(response as AttackScenario[]);
+      const response = await apiRequest<AttackScenario[]>("/api/attack-scenarios");
+      setScenarios(response);
     } catch (error) {
       console.error("Error fetching attack scenarios:", error);
       toast({
@@ -84,11 +81,8 @@ const AttackScenario: FC<AttackScenarioProps> = () => {
   // Fetch vulnerabilities for a specific scenario
   const fetchVulnerabilities = async (scenarioId: number) => {
     try {
-      const response = await apiRequest({
-        url: `/api/attack-scenarios/${scenarioId}/vulnerabilities`,
-        method: "GET",
-      });
-      setVulnerabilities(response as Vulnerability[]);
+      const response = await apiRequest<Vulnerability[]>(`/api/attack-scenarios/${scenarioId}/vulnerabilities`);
+      setVulnerabilities(response);
     } catch (error) {
       console.error("Error fetching vulnerabilities:", error);
       toast({
@@ -118,10 +112,9 @@ const AttackScenario: FC<AttackScenarioProps> = () => {
 
     setIsLoading(true);
     try {
-      const newScenario = await apiRequest({
-        url: "/api/attack-scenarios",
+      const newScenario = await apiRequest("/api/attack-scenarios", {
         method: "POST",
-        data: {
+        body: {
           name: scenarioName,
           target: targetUrl,
           description,

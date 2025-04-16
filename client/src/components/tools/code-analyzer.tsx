@@ -87,7 +87,7 @@ const CodeAnalyzer: React.FC<CodeAnalyzerProps> = () => {
     setAnalysisResult(null);
 
     try {
-      const response = await apiRequest("/api/analyze-code", {
+      const response = await apiRequest<AnalysisResult>("/api/analyze-code", {
         method: "POST",
         body: { url },
       });
