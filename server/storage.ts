@@ -1,9 +1,17 @@
-import { users, type User, type InsertUser, insertMessageSchema, messages, type Message, type InsertMessage, chatSessions, type ChatSession, type InsertChatSession } from "@shared/schema";
+import { 
+  users, type User, type InsertUser,
+  messages, type Message, type InsertMessage, 
+  chatSessions, type ChatSession, type InsertChatSession,
+  attackScenarios, type AttackScenario, type InsertAttackScenario,
+  vulnerabilities, type Vulnerability, type InsertVulnerability,
+  attackVectors, type AttackVector, type InsertAttackVector,
+  scenarioVulnerabilities, type ScenarioVulnerability, type InsertScenarioVulnerability
+} from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
-// modify the interface with any CRUD methods
-// you might need
-
+// Interface defining storage operations
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -18,82 +26,178 @@ export interface IStorage {
   getMessages(sessionId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   getMessageById(id: number): Promise<Message | undefined>;
+  
+  // Attack scenario methods
+  createAttackScenario(scenario: InsertAttackScenario): Promise<AttackScenario>;
+  getAttackScenarios(): Promise<AttackScenario[]>;
+  getAttackScenarioById(id: number): Promise<AttackScenario | undefined>;
+  
+  // Vulnerability methods
+  createVulnerability(vulnerability: InsertVulnerability): Promise<Vulnerability>;
+  getVulnerabilities(): Promise<Vulnerability[]>;
+  
+  // Attack vector methods
+  createAttackVector(vector: InsertAttackVector): Promise<AttackVector>;
+  getAttackVectors(type?: string): Promise<AttackVector[]>;
+  
+  // Scenario vulnerability linking
+  linkVulnerabilityToScenario(link: InsertScenarioVulnerability): Promise<ScenarioVulnerability>;
+  getVulnerabilitiesForScenario(scenarioId: number): Promise<(Vulnerability & { status: string, notes?: string, poc?: string })[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private chatSessions: Map<number, ChatSession>;
-  private messages: Map<number, Message>;
-  private currentUserId: number;
-  private currentSessionId: number;
-  private currentMessageId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.chatSessions = new Map();
-    this.messages = new Map();
-    this.currentUserId = 1;
-    this.currentSessionId = 1;
-    this.currentMessageId = 1;
-  }
-
+// Database storage implementation
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
   
   async getChatSession(id: number): Promise<ChatSession | undefined> {
-    return this.chatSessions.get(id);
+    const [session] = await db.select().from(chatSessions).where(eq(chatSessions.id, id));
+    return session || undefined;
   }
   
   async createChatSession(insertSession: InsertChatSession): Promise<ChatSession> {
-    const id = this.currentSessionId++;
-    const session: ChatSession = { 
-      ...insertSession, 
-      id, 
-      createdAt: new Date() 
-    };
-    this.chatSessions.set(id, session);
+    const [session] = await db
+      .insert(chatSessions)
+      .values({
+        ...insertSession,
+        createdAt: new Date()
+      })
+      .returning();
     return session;
   }
   
   async getChatSessionsByUserId(userId: number): Promise<ChatSession[]> {
-    return Array.from(this.chatSessions.values())
-      .filter(session => session.userId === userId);
+    return await db.select()
+      .from(chatSessions)
+      .where(eq(chatSessions.userId, userId))
+      .orderBy(desc(chatSessions.createdAt));
   }
   
   async getMessages(sessionId: number): Promise<Message[]> {
-    return Array.from(this.messages.values())
-      .filter(message => message.sessionId === sessionId)
-      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return await db.select()
+      .from(messages)
+      .where(eq(messages.sessionId, sessionId))
+      .orderBy(messages.timestamp);
   }
   
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = this.currentMessageId++;
-    const message: Message = {
-      ...insertMessage,
-      id,
-      timestamp: insertMessage.timestamp || new Date()
-    };
-    this.messages.set(id, message);
+    // Create a new message without the timestamp field
+    const [message] = await db
+      .insert(messages)
+      .values(insertMessage)
+      .returning();
     return message;
   }
   
   async getMessageById(id: number): Promise<Message | undefined> {
-    return this.messages.get(id);
+    const [message] = await db.select().from(messages).where(eq(messages.id, id));
+    return message || undefined;
+  }
+  
+  // Attack scenario methods
+  async createAttackScenario(insertScenario: InsertAttackScenario): Promise<AttackScenario> {
+    const [scenario] = await db
+      .insert(attackScenarios)
+      .values({
+        ...insertScenario,
+        status: 'created',
+        findings: {},
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return scenario;
+  }
+  
+  async getAttackScenarios(): Promise<AttackScenario[]> {
+    return await db.select()
+      .from(attackScenarios)
+      .orderBy(desc(attackScenarios.createdAt));
+  }
+  
+  async getAttackScenarioById(id: number): Promise<AttackScenario | undefined> {
+    const [scenario] = await db.select().from(attackScenarios).where(eq(attackScenarios.id, id));
+    return scenario || undefined;
+  }
+  
+  // Vulnerability methods
+  async createVulnerability(insertVuln: InsertVulnerability): Promise<Vulnerability> {
+    const [vuln] = await db
+      .insert(vulnerabilities)
+      .values(insertVuln)
+      .returning();
+    return vuln;
+  }
+  
+  async getVulnerabilities(): Promise<Vulnerability[]> {
+    return await db.select().from(vulnerabilities);
+  }
+  
+  // Attack vector methods
+  async createAttackVector(insertVector: InsertAttackVector): Promise<AttackVector> {
+    const [vector] = await db
+      .insert(attackVectors)
+      .values(insertVector)
+      .returning();
+    return vector;
+  }
+  
+  async getAttackVectors(type?: string): Promise<AttackVector[]> {
+    if (type) {
+      return await db.select()
+        .from(attackVectors)
+        .where(eq(attackVectors.type, type));
+    }
+    return await db.select().from(attackVectors);
+  }
+  
+  // Scenario vulnerability linking
+  async linkVulnerabilityToScenario(insertLink: InsertScenarioVulnerability): Promise<ScenarioVulnerability> {
+    const [link] = await db
+      .insert(scenarioVulnerabilities)
+      .values(insertLink)
+      .returning();
+    return link;
+  }
+  
+  async getVulnerabilitiesForScenario(scenarioId: number): Promise<(Vulnerability & { status: string, notes?: string, poc?: string })[]> {
+    // Join the vulnerabilities with the scenario_vulnerabilities table
+    const results = await db
+      .select({
+        id: vulnerabilities.id,
+        name: vulnerabilities.name,
+        description: vulnerabilities.description,
+        severity: vulnerabilities.severity,
+        cve: vulnerabilities.cve,
+        remediation: vulnerabilities.remediation,
+        status: scenarioVulnerabilities.status,
+        notes: scenarioVulnerabilities.notes,
+        poc: scenarioVulnerabilities.proofOfConcept
+      })
+      .from(vulnerabilities)
+      .innerJoin(
+        scenarioVulnerabilities,
+        eq(vulnerabilities.id, scenarioVulnerabilities.vulnerabilityId)
+      )
+      .where(eq(scenarioVulnerabilities.scenarioId, scenarioId));
+      
+    return results;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
