@@ -150,18 +150,16 @@ export class DatabaseStorage implements IStorage {
   
   // Attack vector methods
   async createAttackVector(insertVector: InsertAttackVector): Promise<AttackVector> {
-    // Prepare data with payloads as an array
-    const data = {
-      name: insertVector.name,
-      type: insertVector.type,
-      description: insertVector.description,
-      payloads: Array.isArray(insertVector.payloads) ? insertVector.payloads : []
-    };
-    
     // Insert the vector into the database
+    // Wrap in an array of objects for drizzle-orm syntax
     const [vector] = await db
       .insert(attackVectors)
-      .values([data])
+      .values({
+        name: insertVector.name,
+        type: insertVector.type,
+        description: insertVector.description,
+        payloads: insertVector.payloads as string[] || [] // Cast to expected type
+      })
       .returning();
     return vector;
   }

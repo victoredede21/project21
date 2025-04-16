@@ -70,16 +70,29 @@ npm run dev
 
 ### Deploying to Render.com
 
+#### Option 1: Manual Setup
 1. Create a new Web Service on Render.com
 2. Connect your GitHub repository
 3. Configure the following settings:
    - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm start`
 4. Add the environment variables in the Render dashboard:
-   - `DATABASE_URL`
-   - `OPENAI_API_KEY`
+   - `DATABASE_URL` (PostgreSQL connection string)
+   - `OPENAI_API_KEY` (Your OpenAI API key)
    - `NODE_ENV=production`
 5. Deploy the application
+
+#### Option 2: Using render.yaml (Blueprint)
+This repository includes a `render.yaml` file that defines the infrastructure needed to run the application on Render.com.
+
+1. Fork or clone this repository to your GitHub account
+2. In Render.com, click "New" and select "Blueprint"
+3. Connect your GitHub repository
+4. Render will detect the `render.yaml` file and configure the service automatically
+5. You'll need to add the environment secrets:
+   - `DATABASE_URL`
+   - `OPENAI_API_KEY`
+6. Deploy the application
 
 ## License
 
