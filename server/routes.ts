@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getResponseFromOpenAI } from "./services/openai";
+import { analyzeWebsite } from "./services/codeAnalyzer";
 import { 
   generateBasicXSSPayloads,
   generateSQLiPayloads,
@@ -271,6 +272,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching vulnerabilities for scenario:", error);
       return res.status(500).json({ error: "Failed to fetch vulnerabilities for scenario" });
+    }
+  });
+
+  // Code analysis endpoint
+  app.post("/api/analyze-code", async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({ error: "URL is required" });
+      }
+      
+      // Analyze the website
+      const analysisResult = await analyzeWebsite(url);
+      
+      return res.json(analysisResult);
+    } catch (error) {
+      console.error("Error analyzing website:", error);
+      return res.status(500).json({ 
+        error: "Failed to analyze website",
+        message: error.message
+      });
     }
   });
 

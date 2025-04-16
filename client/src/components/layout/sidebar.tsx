@@ -12,6 +12,7 @@ import {
   PuzzleIcon,
   Clock,
   Target,
+  ShieldAlert,
 } from "lucide-react";
 import { useChat } from "@/hooks/use-chat";
 
@@ -157,6 +158,17 @@ const Sidebar: FC<SidebarProps> = ({ onToolSelect, currentTool }) => {
         >
           <Target className="h-4 w-4 mr-2" />
           Attack Scenario
+        </Button>
+
+        <Button
+          variant={currentTool === "codeanalyzer" ? "default" : "ghost"}
+          className={`w-full justify-start text-left px-3 py-2 h-auto ${
+            currentTool === "codeanalyzer" ? "bg-primary-600 text-white" : ""
+          }`}
+          onClick={() => onToolSelect("codeanalyzer")}
+        >
+          <ShieldAlert className="h-4 w-4 mr-2" />
+          Code Analyzer
         </Button>
 
         <div className="text-xs uppercase text-gray-500 font-semibold ml-2 mt-4">
