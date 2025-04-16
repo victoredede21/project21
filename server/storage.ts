@@ -150,15 +150,33 @@ export class DatabaseStorage implements IStorage {
   
   // Attack vector methods
   async createAttackVector(insertVector: InsertAttackVector): Promise<AttackVector> {
+    // Use a temporary field that matches the expected type
+    let payloads: string[] = [];
+    
+    // Try to safely convert the payloads field to a string array
+    if (insertVector.payloads) {
+      if (Array.isArray(insertVector.payloads)) {
+        payloads = insertVector.payloads.map(p => String(p));
+      } else {
+        try {
+          // If it's a JSON string, parse it
+          const parsed = JSON.parse(String(insertVector.payloads));
+          payloads = Array.isArray(parsed) ? parsed.map(p => String(p)) : [String(insertVector.payloads)];
+        } catch {
+          // If parsing fails, treat as a single string
+          payloads = [String(insertVector.payloads)];
+        }
+      }
+    }
+    
     // Insert the vector into the database
-    // Wrap in an array of objects for drizzle-orm syntax
     const [vector] = await db
       .insert(attackVectors)
       .values({
         name: insertVector.name,
         type: insertVector.type,
         description: insertVector.description,
-        payloads: insertVector.payloads as string[] || [] // Cast to expected type
+        payloads: payloads
       })
       .returning();
     return vector;

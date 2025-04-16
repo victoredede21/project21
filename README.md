@@ -7,16 +7,23 @@ A powerful AI-powered cybersecurity assistant chatbot for security professionals
 
 ## Features
 
+### Core Intelligence Features
 - **AI Chat Assistant**: Communicate with an AI assistant specialized in cybersecurity topics
-- **Payload Generator**: Create various security testing payloads for XSS, SQL injection, and more
-- **Encoder/Decoder**: Encode and decode text in various formats (Base64, URL, HTML, Hex)
-- **Request Analyzer**: Analyze HTTP requests for security issues and potential vulnerabilities
-- **Vulnerability Explainer**: Get detailed explanations of different types of vulnerabilities
-- **Reconnaissance Assistant**: Plan and execute reconnaissance on target websites
-- **Bug Report Generator**: Create professional bug bounty reports
-- **Wordlist Generator**: Create custom wordlists for security testing
-- **Attack Scenario Builder**: Build and track real-world attack scenarios
+- **Payload Generator**: Create various security testing payloads for XSS, SQLi, SSTI, Command Injection, LFI, and more
+- **Encoder/Decoder**: Encode and decode text in various formats (Base64, URL, HTML, Hex, Unicode)
+- **Request Analyzer**: Analyze HTTP requests for security issues, injection points, and potential vulnerabilities
+- **Vulnerability Explainer**: Get detailed explanations of vulnerabilities with exploitation techniques
+- **Reconnaissance Assistant**: Plan and execute reconnaissance on target websites with suggested methodology
+- **Bug Report Generator**: Create professional bug bounty reports with proper formatting
+- **Wordlist Generator**: Create custom wordlists based on domain, parameters, and tech stack
+- **Attack Scenario Builder**: Build and track real-world attack scenarios with findings
 - **Source Code Analyzer**: Scan websites to detect JavaScript vulnerabilities and generate targeted payloads
+
+### Key Capabilities
+- **AI-Powered Analysis**: Uses OpenAI's models for advanced security reasoning and payload generation
+- **Database-Backed Storage**: Saves attack scenarios, vulnerabilities, and findings for future reference
+- **Comprehensive Toolset**: Includes specialized tools for various security testing needs
+- **Interactive UI**: Modern, responsive interface with dark theme suitable for security professionals
 
 ## Technical Stack
 
