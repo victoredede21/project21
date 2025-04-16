@@ -150,9 +150,18 @@ export class DatabaseStorage implements IStorage {
   
   // Attack vector methods
   async createAttackVector(insertVector: InsertAttackVector): Promise<AttackVector> {
+    // Prepare data with payloads as an array
+    const data = {
+      name: insertVector.name,
+      type: insertVector.type,
+      description: insertVector.description,
+      payloads: Array.isArray(insertVector.payloads) ? insertVector.payloads : []
+    };
+    
+    // Insert the vector into the database
     const [vector] = await db
       .insert(attackVectors)
-      .values(insertVector)
+      .values([data])
       .returning();
     return vector;
   }
@@ -185,6 +194,7 @@ export class DatabaseStorage implements IStorage {
         severity: vulnerabilities.severity,
         cve: vulnerabilities.cve,
         remediation: vulnerabilities.remediation,
+        createdAt: vulnerabilities.createdAt,
         status: scenarioVulnerabilities.status,
         notes: scenarioVulnerabilities.notes,
         poc: scenarioVulnerabilities.proofOfConcept
@@ -196,7 +206,19 @@ export class DatabaseStorage implements IStorage {
       )
       .where(eq(scenarioVulnerabilities.scenarioId, scenarioId));
       
-    return results;
+    // Process results to match expected type
+    return results.map(vuln => ({
+      id: vuln.id,
+      name: vuln.name,
+      description: vuln.description,
+      severity: vuln.severity,
+      cve: vuln.cve,
+      remediation: vuln.remediation,
+      createdAt: vuln.createdAt,
+      status: vuln.status || 'unverified',
+      notes: vuln.notes ? String(vuln.notes) : undefined,
+      poc: vuln.poc ? String(vuln.poc) : undefined
+    }));
   }
 }
 
