@@ -89,14 +89,10 @@ const CodeAnalyzer: React.FC<CodeAnalyzerProps> = () => {
     try {
       const response = await apiRequest("/api/analyze-code", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
+        body: { url },
       });
-
-      const result = await response.json();
-      setAnalysisResult(result);
+      
+      setAnalysisResult(response);
     } catch (error) {
       console.error("Error analyzing website:", error);
       setError("Failed to analyze website. Please check the URL and try again.");

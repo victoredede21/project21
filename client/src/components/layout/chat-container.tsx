@@ -12,6 +12,7 @@ import VulnExplainer from "@/components/tools/vuln-explainer";
 import ReconAssistant from "@/components/tools/recon-assistant";
 import BugReport from "@/components/tools/bug-report";
 import AttackScenario from "@/components/tools/attack-scenario";
+import CodeAnalyzer from "@/components/tools/code-analyzer";
 
 interface ChatContainerProps {
   activeTool: string;
@@ -68,6 +69,8 @@ const ChatContainer: FC<ChatContainerProps> = ({ activeTool }) => {
         return <BugReport />;
       case "scenario":
         return <AttackScenario />;
+      case "codeanalyzer":
+        return <CodeAnalyzer />;
       default:
         return null;
     }
