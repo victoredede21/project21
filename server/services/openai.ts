@@ -3,7 +3,7 @@ import OpenAI from "openai";
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const MODEL = "gpt-4o";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-demo-key" });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "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" });
 
 const getSystemPromptForTool = (toolName?: string): string => {
   const basePrompt = `You are HackAssistAI, a specialized cybersecurity chatbot assistant for security professionals. 
