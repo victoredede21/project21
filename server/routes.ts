@@ -290,9 +290,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(analysisResult);
     } catch (error) {
       console.error("Error analyzing website:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return res.status(500).json({ 
         error: "Failed to analyze website",
-        message: error.message
+        message: errorMessage
       });
     }
   });

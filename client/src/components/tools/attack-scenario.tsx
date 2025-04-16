@@ -112,7 +112,7 @@ const AttackScenario: FC<AttackScenarioProps> = () => {
 
     setIsLoading(true);
     try {
-      const newScenario = await apiRequest("/api/attack-scenarios", {
+      const newScenario = await apiRequest<AttackScenario>("/api/attack-scenarios", {
         method: "POST",
         body: {
           name: scenarioName,

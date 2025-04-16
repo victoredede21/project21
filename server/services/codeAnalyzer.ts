@@ -93,7 +93,8 @@ export async function fetchAndExtractCode(url: string): Promise<{
     };
   } catch (error) {
     console.error(`Error fetching and extracting code from ${url}:`, error);
-    throw new Error(`Failed to analyze website: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to analyze website: ${errorMessage}`);
   }
 }
 
@@ -114,10 +115,10 @@ function analyzeDomVulnerabilities(html: string): CodeVulnerability[] {
       if (attr.startsWith('on')) {
         vulnerabilities.push({
           type: 'DOM-based XSS',
-          description: `Inline event handler found in ${element.tagName} element`,
+          description: `Inline event handler found in ${(element as any).tagName || 'unknown'} element`,
           severity: 'high',
-          foundIn: `<${element.tagName} ${attr}="${attributes[attr]}">`,
-          suggestedPayload: `<${element.tagName} ${attr}="alert('XSS')">`,
+          foundIn: `<${(element as any).tagName || 'div'} ${attr}="${attributes[attr]}">`,
+          suggestedPayload: `<${(element as any).tagName || 'div'} ${attr}="alert('XSS')">`,
         });
       }
     });
@@ -132,7 +133,7 @@ function analyzeDomVulnerabilities(html: string): CodeVulnerability[] {
         type: 'Potential DOM Manipulation',
         description: `Element with ID that suggests user input: ${attributes.id}`,
         severity: 'medium',
-        foundIn: `<${element.tagName} id="${attributes.id}">`,
+        foundIn: `<${(element as any).tagName || 'div'} id="${attributes.id}">`,
         suggestedPayload: `document.getElementById('${attributes.id}').innerHTML='<img src=x onerror=alert("XSS")>'`,
       });
     }
@@ -340,6 +341,7 @@ export async function analyzeWebsite(url: string): Promise<AnalysisResult> {
     };
   } catch (error) {
     console.error("Error analyzing website:", error);
-    throw new Error(`Failed to analyze website: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to analyze website: ${errorMessage}`);
   }
 }
